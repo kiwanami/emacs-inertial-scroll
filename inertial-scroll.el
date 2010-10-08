@@ -94,30 +94,31 @@ scrolling needs more time to stop.")
        (setq callee (lambda( ,@args ) ,@body))
        (funcall callee ,@argsyms)))))
 
-(defun inertias-thread-line (wait-time chain line)
-  (cond
-   ;; function object
-   ((functionp line)
-    `(setq ,chain (deferred:nextc ,chain ,line)))
-   ;; while loop form
-   ((eq 'while (car line))
-    (let ((condition (cadr line))
-          (body (cddr line))
-          (retsym (gensym)))
-    `(setq ,chain 
-      (deferred:nextc ,chain 
-        (inertias-jslambda (x) 
-         (if ,condition 
-             (deferred:nextc 
-               (let ((,retsym (progn ,@body)))
-                 (if (deferred-p ,retsym) ,retsym
-                   (deferred:wait ,wait-time)))
-               callee)))))))
-   ;; statement
-   (t
-    `(setq ,chain 
-           (deferred:nextc ,chain 
-             (lambda (x) ,line))))))
+(eval-when-compile
+  (defun inertias-thread-line (wait-time chain line)
+    (cond
+     ;; function object
+     ((functionp line)
+      `(setq ,chain (deferred:nextc ,chain ,line)))
+     ;; while loop form
+     ((eq 'while (car line))
+      (let ((condition (cadr line))
+            (body (cddr line))
+            (retsym (gensym)))
+        `(setq ,chain 
+               (deferred:nextc ,chain 
+                 (inertias-jslambda
+                  (x) (if ,condition 
+                          (deferred:nextc 
+                            (let ((,retsym (progn ,@body)))
+                              (if (deferred-p ,retsym) ,retsym
+                                (deferred:wait ,wait-time)))
+                            callee)))))))
+     ;; statement
+     (t
+      `(setq ,chain 
+             (deferred:nextc ,chain 
+               (lambda (x) ,line)))))))
 
 (defmacro inertias-thread (wait-time &rest argbody)
   (let ((chain (gensym))
