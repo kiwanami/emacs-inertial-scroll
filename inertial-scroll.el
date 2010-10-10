@@ -38,23 +38,34 @@
 ;; smoother, customizing the interval time or velocity.
 ;; Here is a sample customize code.
 
-;; (setq inertias-initial-velocity 80)
+;; (setq inertias-initial-velocity 50)
 ;; (setq inertias-friction 120)
 ;; (setq inertias-update-time 50)
 ;; (setq inertias-rest-coef 0.1)
 ;; (setq inertias-global-minor-mode-map 
 ;;       (inertias-define-keymap
 ;;        '(
+;;          ;; Mouse wheel scrolling
+;;          ("<wheel-up>"   . inertias-down-wheel)
+;;          ("<wheel-down>" . inertias-up-wheel)
+;;          ("<mouse-4>"    . inertias-down-wheel)
+;;          ("<mouse-5>"    . inertias-up-wheel)
+;;          ;; Scroll keys
 ;;          ("<next>"  . inertias-up)
 ;;          ("<prior>" . inertias-down)
 ;;          ("C-v"     . inertias-up)
 ;;          ("M-v"     . inertias-down)
 ;;          ) inertias-prefix-key))
 
-;;; TODO:
+;;; History:
 
-;; scroll-to
-;; cursol scroll?
+;; Revision 1.1  2010/10/10  sakurai
+;;  Added an option switch: inertias-rebound-flash.
+;;  Added mouse wheel scrolling (thx @peccu).
+;;  Modified default parameters.
+;; 
+;; Revision 1.0  2010/10/08  sakurai
+;;  First release.
 
 ;;; Code:
 
@@ -62,8 +73,11 @@
 
 ;;; Customize
 
-(defvar inertias-initial-velocity 80.0
+(defvar inertias-initial-velocity 50.0
 "Initial scrolling velocity (lines/sec). ")
+
+(defvar inertias-initial-velocity-wheel 10.0
+"Initial scrolling velocity for wheel (lines/sec).")
 
 (defvar inertias-friction 120.0
 "Frictional coefficient (lines/sec^2). The larger value stops
@@ -82,6 +96,10 @@ and 0.0 does viscous.")
 "Brake friction coefficient. This value should be less than
 1.0. At the value 0.0, scrolling stops suddenly. At larger value,
 scrolling needs more time to stop.")
+
+(defvar inertias-rebound-flash t
+"Rebounding flash effect at buffer edges. If nil, no flash
+effect is shown.")
 
 
 
@@ -146,6 +164,18 @@ scrolling needs more time to stop.")
   (interactive)
   (inertias-scrolling 
    (- inertias-initial-velocity)
+   (selected-window)))
+
+(defun inertias-up-wheel ()
+  (interactive)
+  (inertias-scrolling
+   inertias-initial-velocity-wheel
+   (selected-window)))
+
+(defun inertias-down-wheel ()
+  (interactive)
+  (inertias-scrolling
+   (- inertias-initial-velocity-wheel)
    (selected-window)))
 
 (defun inertias-stop (&optional window)
@@ -268,7 +298,8 @@ value.")
              (when (eql prev-window-start (window-start window))
                ;; rebounding on the edge of buffer
                (setf (cdr pair) (* vel (- inertias-rest-coef)))
-               (inertias-rebound-effect window)))))))
+               (if inertias-rebound-flash
+                   (inertias-rebound-effect window))))))))
      )))
 
 (defun inertias-brake-scrolling (vel window)
@@ -313,23 +344,6 @@ value.")
                (with-selected-window i
                  (scroll-up num))))))
 
-;;; Memo
-
-;; (setq inertias-initial-velocity 80)
-;; (setq inertias-friction 120)
-;; (setq inertias-update-time 50)
-
-;; (setq inertias-global-minor-mode-map 
-;;       (inertias-define-keymap
-;;        '(
-;;          ("<next>"  . inertias-up)
-;;          ("<prior>" . inertias-down)
-;;          ("C-v"     . inertias-up)
-;;          ("M-v"     . inertias-down)
-;;          ) inertias-prefix-key))
-      
-;; (inertias-stop)
-;; (setq inertias-window-velocity-alist nil)
 
 (provide 'inertial-scroll)
 ;;; inertial-scroll.el ends here
