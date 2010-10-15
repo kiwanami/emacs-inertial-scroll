@@ -336,7 +336,7 @@ value.")
     (with-selected-window window
       (scroll-up num)))
   ;; for follow-mode
-  (when (and (featurep 'follow-mode)
+  (when (and (symbol-plist 'follow-mode)
              (buffer-local-value 'follow-mode (window-buffer window)))
     (loop for i in (get-buffer-window-list (window-buffer window))
           unless (eq window i)
