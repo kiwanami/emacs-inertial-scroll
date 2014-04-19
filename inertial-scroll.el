@@ -3,7 +3,9 @@
 ;; Copyright (C) 2010  SAKURAI Masashi
 
 ;; Author: SAKURAI Masashi <m.sakurai at kiwanami.net>
+;; URL: https://github.com/syohex/emacs-inertial-scroll
 ;; Keywords: scroll, deferred
+;; Package-Requires: ((deferred "0.3.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -69,6 +71,7 @@
 
 ;;; Code:
 
+(require 'cl)
 (require 'deferred)
 
 ;;; Customize
@@ -346,4 +349,9 @@ value.")
 
 
 (provide 'inertial-scroll)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
+
 ;;; inertial-scroll.el ends here
