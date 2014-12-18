@@ -160,13 +160,13 @@ effect is shown.")
 (defun inertias-up ()
   (interactive)
   (inertias-scrolling
-   inertias-initial-velocity
+   (* inertias-initial-velocity (window-normal-size (selected-window)))
    (selected-window)))
 
 (defun inertias-down ()
   (interactive)
   (inertias-scrolling 
-   (- inertias-initial-velocity)
+   (- (* inertias-initial-velocity (window-normal-size (selected-window))))
    (selected-window)))
 
 (defun inertias-up-wheel ()
@@ -276,7 +276,7 @@ value.")
               (vel prev-vel)
               (dt (max (/ inertias-update-time 1000.0)
                        (- (float-time) last-time)))
-              (frc (* dt inertias-friction))
+              (frc (* dt (* inertias-friction (window-normal-size window))))
               (scrnum 0)
               (prev-window-start (window-start window)))
          (setq last-time (float-time))
